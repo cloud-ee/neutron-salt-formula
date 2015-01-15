@@ -68,4 +68,96 @@
 -#} 
 
 
+{%- set api_config = {
+  "composite:neutron": {
+    "use": "egg:Paste#urlmap\n/:neutronversions\n/v2.0: neutronapi_v2_0",
+    },
+    "composite:neutronapi_v2_0]": {
+    "use": "call:neutron.auth:pipeline_factory",
+    "noauth": "request_id catch_errors extensions neutronapiapp_v2_0",
+    "keystone": "request_id catch_errors authtoken keystonecontext extensions neutronapiapp_v2_0",
+    },
+    "filter:request_id": {
+    "paste.filter_factory": "neutron.openstack.common.middleware.request_id:RequestIdMiddleware.factory",
+  },
+    "filter:catch_errors]": {
+    "paste.filter_factory": "neutron.openstack.common.middleware.catch_errors:CatchErrorsMiddleware.factory",
+  },
+    "filter:keystonecontext": {
+    "paste.filter_factory": "neutron.auth:NeutronKeystoneContext.factory",
+  },
+    "filter:authtoken": {
+    "paste.filter_factory": "keystoneclient.middleware.auth_token:filter_factory",
+    "auth_host": "keystone.host",
+    "admin_tenant_name": "service",
+    "admin_user": "neutron",
+    "admin_password": "pass",
+  },
+    "filter:extensions": {
+    "paste.filter_factory": "neutron.api.extensions:plugin_aware_extension_middleware_factory",
+  },
+    "app:neutronversions": {
+    "paste.app_factory": "neutron.api.versions:Versions.factory",
+  },
+    "app:neutronapiapp_v2_0": {
+    "paste.app_factory": "neutron.api.v2.router:APIRouter.factory",
+  }
+} %}
 
+{% for section, value in salt["pillar.get"]("api:config", {}).iteritems() %}
+  {% if not api_config.has_key(section) %}
+    {% do api_config.update({ section:{} }) %}
+  {% endif %}
+  {% do api_config[section].update(value) %}
+{% endfor %}
+
+{#- vim:ft=sls
+-#}
+
+{% for section, value in salt["pillar.get"]("l3_agent.ini:config", {}).iteritems() %}
+  {% if not l3_agent.ini_config.has_key(section) %}
+    {% do l3_agent.ini_config.update({ section:{} }) %}
+  {% endif %}
+  {% do l3_agent.ini_config[section].update(value) %}
+{% endfor %}
+
+{#- vim:ft=sls
+-#}
+
+
+{%- set ml2_config = {
+  "ml2": {
+    "type_drivers": "vlan",
+    "tenant_network_types": "vlan",
+    "mechanism_drivers": "openvswitch",
+    },
+  "ml2_type_flat": {
+    },
+  "ml2_type_vlan": {
+    "network_vlan_ranges": "physnet1:300:300,physnet1:128:254,physnet1:60:60",
+    },
+  "ml2_type_gre": {
+    },
+  "ml2_type_vxlan": {
+    },
+  "securitygroup": {
+    "enable_security_group": "True",
+    "firewall_driver": "neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver",
+    },
+  "security_group]": {
+    "enable_security_group": "True",
+    },
+  "OVS": {
+    "bridge_mappings": "physnet1:br0",
+    }
+} %}
+
+{% for section, value in salt["pillar.get"]("ml2:config", {}).iteritems() %}
+  {% if not ml2_config.has_key(section) %}
+    {% do ml2_config.update({ section:{} }) %}
+  {% endif %}
+  {% do ml2_config[section].update(value) %}
+{% endfor %}
+
+{#- vim:ft=sls
+-#}
