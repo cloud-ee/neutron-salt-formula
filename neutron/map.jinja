@@ -1,10 +1,71 @@
-# Set the nova default config
-{%- set nova_config = {
+{% set neutron=salt["grains.filter_by"]({
+  "Debian":{
+    "name": "neutron-server",
+    "pkg": ['neutron-server', 'neutron-plugin-ml2 ', 'python-neutronclient'],
+    "service": ['neutron-server'],
+    "client_pkg": "python-neutronclient",
+}
+  },merge=salt["pillar.get"]("neutron:lookup")) %}
+
+# Set the neutron default config
+{%- set neutron_config = {
   "DEFAULT": {
     "debug": "False",
     "verbose": "True",
     "state_path": "/var/lib/neutron",
     "lock_path": "$state_path/lock",
     "core_plugin": "neutron.plugins.ml2.plugin.Ml2Plugin",
+    "service_plugins": "router",
+    "api_paste_config": "/etc/neutron/api-paste.ini",
+    "auth_strategy":  "keystone",
+    "allow_overlapping_ips": "True",
+    "rpc_backend": "neutron.openstack.common.rpc.impl_kombu",
+    "rabbit_host": "rabbit.cloud",
+    "rabbit_port": "5672",
+    "rabbit_userid": "neutron",
+    "rabbit_password": "pass",
+    "rabbit_virtual_host": "/openstack",
+    "rabbit_use_ssl": "False",
+    "notification_driver": "neutron.openstack.common.notifier.rpc_notifier",
+    "notify_nova_on_port_status_changes": "True",
+    "notify_nova_on_port_data_changes": "True",
+    "nova_url": "http://compute.cloud:8774/v2",
+    "nova_region_name": "regionOne",
+    "nova_admin_username": "nova",
+    "nova_admin_tenant_id": "pass",
+    "nova_admin_password": "pass",
+    "nova_admin_auth_url": "http://controller:35357/v2.0",
+    },
+    "quotas": {
+    },
+    "agent": {
+    "root_helper": "sudo /usr/bin/neutron-rootwrap /etc/neutron/rootwrap.conf",
+    },
+    "keystone_authtoken": {
+    "auth_host": "keystone_host",
+    "auth_port": "35357",
+    "auth_protocol": "http",
+    "admin_tenant_name": "service",
+    "admin_user": "neutron",
+    "admin_password": "pass",
+    "signing_dir": "$state_path/keystone-signing",
+    },
+    "database": {
+    "connection": "postgresql://neutron:pass@db.host/neutron",
+    },
+    "service_providers": {
+  }
+} %}
 
-  },
+{% for section, value in salt["pillar.get"]("neutron:config", {}).iteritems() %}
+  {% if not neutron_config.has_key(section) %}
+    {% do neutron_config.update({ section:{} }) %}
+  {% endif %}
+  {% do neutron_config[section].update(value) %}
+{% endfor %}
+
+{#- vim:ft=sls
+-#} 
+
+
+
