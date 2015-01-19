@@ -1,5 +1,8 @@
 {%- from "neutron/map.jinja" import neutron with context %}
 
+include:
+  - .db
+
 {{ neutron.name }}:
   pkg.installed:
     - refresh: False
