@@ -15,8 +15,8 @@ keystone_{{ name }}_user:
 keystone_{{ name }}_service:
   keystone.service_present:
     - name: {{ name }}
-    - service_type: compute
-    - description: Openstack Compute Service
+    - service_type: network
+    - description: Openstack neutron Service
 
 keystone_{{ name }}_endpoint:
   keystone.endpoint_present:

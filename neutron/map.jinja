@@ -41,7 +41,7 @@
     "signing_dir": "$state_path/keystone-signing",
     },
     "database": {
-    "connection": salt["pillar.get"]("neutron:db:driver") + "://neutron:" + salt["pillar.get"]("neutron:db:password") + "@" + salt["pillar.get"]("neutron:db:ip", "localhost") + "/eutron",
+    "connection": salt["pillar.get"]("neutron:db:driver") + "://neutron:" + salt["pillar.get"]("neutron:db:password") + "@" + salt["pillar.get"]("neutron:db:ip", "localhost") + "/neutron",
     },
     "service_providers": {
   }
