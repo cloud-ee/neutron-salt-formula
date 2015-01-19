@@ -2,6 +2,7 @@
 
 include:
   - .db
+  - .keystone
 
 neutron:
   pkg.installed:
