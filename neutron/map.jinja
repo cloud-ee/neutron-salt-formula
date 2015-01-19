@@ -15,18 +15,16 @@
     "rabbit_port": "5672",
     "rabbit_userid": salt["pillar.get"]("neutron:rabbitmq:name"),
     "rabbit_password": salt["pillar.get"]("neutron:rabbitmq:password"),
-    "rabbit_virtual_host": "/openstack",
     "rabbit_use_ssl": "False",
     "notification_driver": "neutron.openstack.common.notifier.rpc_notifier",
     "notify_nova_on_port_status_changes": "True",
     "notify_nova_on_port_data_changes": "True",
-    "nova_url": "http://compute.cloud:8774/v2",
+    "nova_url": "http://" + salt["pillar.get"]("neutron:neutron:nova_ip") + ":8774/v2",
     "nova_region_name": "regionOne",
     "nova_admin_username": "nova",
     "nova_admin_tenant_id": "pass",
     "nova_admin_password": "pass",
-    "nova_admin_auth_url": "http://localhost:35357/v2.0",
-    "vncserver_proxyclient_address": salt["pillar.get"]("nova:internal_ip"),
+    "nova_admin_auth_url": "http://" + salt["pillar.get"]("neutron:neutron:nova_ip") + ":35357/v2.0"
     },
     "quotas": {
     },
@@ -43,7 +41,7 @@
     "signing_dir": "$state_path/keystone-signing",
     },
     "database": {
-    "connection": salt["pillar.get"]("neutron:db:driver") + "://neutron:" + salt["pillar.get"]("neutron:db:password") + "@" + salt["pillar.get"]("neutron:db:ip", "localhost") + "/eutron",,
+    "connection": salt["pillar.get"]("neutron:db:driver") + "://neutron:" + salt["pillar.get"]("neutron:db:password") + "@" + salt["pillar.get"]("neutron:db:ip", "localhost") + "/eutron",
     },
     "service_providers": {
   }
@@ -101,16 +99,6 @@
     {% do api_config.update({ section:{} }) %}
   {% endif %}
   {% do api_config[section].update(value) %}
-{% endfor %}
-
-{#- vim:ft=sls
--#}
-
-{% for section, value in salt["pillar.get"]("l3_agent.ini:config", {}).iteritems() %}
-  {% if not l3_agent.ini_config.has_key(section) %}
-    {% do l3_agent.ini_config.update({ section:{} }) %}
-  {% endif %}
-  {% do l3_agent.ini_config[section].update(value) %}
 {% endfor %}
 
 {#- vim:ft=sls

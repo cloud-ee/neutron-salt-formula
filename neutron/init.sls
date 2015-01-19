@@ -23,10 +23,6 @@ neutron:
     - source: salt://neutron/files/api-paste.ini
     - template: jinja
 
-/etc/neutron/l3_agent.ini:
-  file.managed:
-    - source: salt://neutron/files/l3_agent.ini
-    - template: jinja
 
 /etc/neutron/plugins/ml2/ml2_conf.ini:
   file.managed:
