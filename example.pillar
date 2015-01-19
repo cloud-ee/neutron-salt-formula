@@ -1,0 +1,15 @@
+neutron:
+  neutron:
+    nova_ip:  {{ base.public_ip }}
+  rabbitmq:
+    name: {{ base.rabbitmq_user }}
+    password: {{ base.rabbitmq_password }}
+    ip: {{ base.rabbitmq_ip }}
+  keystone:
+    password: {{ base.keystone_nova_password }}
+    email: {{ base.email }}
+    host: {{ base.keystone_ip }}
+  db:
+    driver: 'postgresql'
+    ip: 'localhost'
+    password: 'openstack'
