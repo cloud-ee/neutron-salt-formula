@@ -14,6 +14,11 @@ neutron:
       - neutron-dhcp-agent
       - neutron-l3-agent
 
+neutron-server:
+  service.running:
+    - watch:
+      - file: /etc/neutron/neutron.conf
+
 /etc/neutron/neutron.conf:
   file.managed:
     - source: salt://neutron/files/neutron.conf
