@@ -3,15 +3,15 @@
 include:
   - .db
 
-{{ neutron.name }}:
+neutron:
   pkg.installed:
-    - refresh: False
-    - pkgs: {{ neutron.pkg }}
-  service.running:
-    - names: {{ neutron.service }}
-    - enable: True
-    - require:
-      - pkg: {{ neutron.name }}
+    - pkgs:
+      - neutron-server
+      - neutron-plugin-ml2 
+      - python-neutronclient
+      - neutron-plugin-openvswitch-agent
+      - neutron-dhcp-agent
+      - neutron-l3-agent
 
 /etc/neutron/neutron.conf:
   file.managed:
