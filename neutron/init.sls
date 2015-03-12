@@ -1,36 +1,30 @@
 {%- from "neutron/map.jinja" import neutron with context %}
 
-include:
-  - .db
-  - .keystone
-
-neutron:
+neutron-common:
   pkg.installed:
     - pkgs:
-      - neutron-server
-      - neutron-plugin-ml2 
-      - python-neutronclient
-      - neutron-plugin-openvswitch-agent
-      - neutron-dhcp-agent
-      - neutron-l3-agent
+      - neutron-common
+      - neutron-plugin-ml2
 
-neutron-server:
-  service.running:
-    - watch:
-      - file: /etc/neutron/neutron.conf
-
-/etc/neutron/neutron.conf:
+{% for file in ['neutron.conf', 'api-paste.ini'] %}
+/etc/neutron/{{ file }}:
   file.managed:
-    - source: salt://neutron/files/neutron.conf
+    - source: salt://neutron/files/{{ file }}
     - template: jinja
-
-/etc/neutron/api-paste.ini:
-  file.managed:
-    - source: salt://neutron/files/api-paste.ini
-    - template: jinja
-
+    - owner: root
+    - group: root
+    - mode: 0644
+    - require:
+      - pkg: neutron-common
+{% endfor %}
 
 /etc/neutron/plugins/ml2/ml2_conf.ini:
   file.managed:
-    - source: salt://neutron/files/ml2.conf
+    - source: salt://neutron/files/ml2_conf.ini
     - template: jinja
+    - owner: root
+    - group: root
+    - mode: 0644
+    - require:
+      - pkg: neutron-common
+

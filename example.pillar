@@ -1,6 +1,18 @@
 neutron:
   neutron:
     nova_ip:  {{ base.public_ip }}
+  plugin:
+    ml2:
+      networks:
+        - name: physnet1
+          vlan_ranges: 
+            - 300\:300
+            - 128\:254
+            - 60\:60
+          port: eth1
+          promisc: True
+          gro: off
+          bridge_mapping: eth2
   rabbitmq:
     name: {{ base.rabbitmq_user }}
     password: {{ base.rabbitmq_password }}
